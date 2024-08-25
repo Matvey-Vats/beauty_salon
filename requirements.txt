@@ -1,0 +1,5 @@
+django
+djangorestframework==3.15.2
+psycopg2-binary
+celery[redis]
+Pillow

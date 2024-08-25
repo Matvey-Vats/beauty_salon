@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./beauty_salon:/beauty_salon
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=database
+      - DB_NAME=Salon
+      - DB_USER=postgres
+      - DB_PASS=admin
+
+    depends_on:
+      - database
+
+  database:
+    image: postgres:14.6-alpine
+    environment:
+      - POSTGRES_DB=Salon
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+
+
