@@ -2,9 +2,13 @@ from django.shortcuts import render
 from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAdminUser
 from rest_framework.exceptions import PermissionDenied
-from .serializers import ServiceSerializer, MasterSerializer
-
-from .models import Service, Master
+from .serializers import (
+    ServiceSerializer,
+    MasterSerializer,
+    AppointmentListSerializer,
+    AppointmentCreateSerializer,
+)
+from .models import Service, Master, Appointment
 
 
 class ServiceListCreateView(generics.ListCreateAPIView):
@@ -37,3 +41,23 @@ class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
 class MasterViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = MasterSerializer
     queryset = Master.objects.all()
+
+
+# class AppointmentViewSet(viewsets.ReadOnlyModelViewSet):
+#     serializer_class = AppointmentSerializer
+#     queryset = Appointment.objects.all()
+    
+    
+class AppointmentListView(generics.ListCreateAPIView):
+    queryset = Appointment.objects.all()
+    
+    
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return AppointmentListSerializer
+        elif self.request.method == "POST":
+            return AppointmentCreateSerializer
+        
+    def perform_create(self, serializer):
+        serializer.save(client=self.request.user)
+        
