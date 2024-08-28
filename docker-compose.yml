@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 127.0.0.1:8000
     volumes:
       - ./beauty_salon:/beauty_salon
     ports:
@@ -13,9 +13,11 @@ services:
       - DB_NAME=Salon
       - DB_USER=postgres
       - DB_PASS=admin
+      - CELERY_BROKER_URL=redis://redis:6379/0  # Добавлено для указания URL брокера Celery
 
     depends_on:
       - database
+      - redis  # Зависимость от Redis, чтобы Celery мог работать
 
   database:
     image: postgres:14.6-alpine
@@ -23,5 +25,27 @@ services:
       - POSTGRES_DB=Salon
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
+
+  redis:
+    image: redis:7.2-alpine  # Добавлен Redis-сервис
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    build: .
+    command: celery -A beauty_salon worker --loglevel=info  # Запуск Celery worker
+    volumes:
+      - ./beauty_salon:/beauty_salon
+    environment:
+      - DB_HOST=database
+      - DB_NAME=Salon
+      - DB_USER=postgres
+      - DB_PASS=admin
+      - CELERY_BROKER_URL=redis://redis:6379/0  # URL брокера для Celery
+    depends_on:
+      - web  # Зависимость от веб-приложения
+      - redis  # Зависимость от Redis
+      - database  # Зависимость от базы данных
+
 
 

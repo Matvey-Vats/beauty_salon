@@ -12,7 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import environ
 from datetime import timedelta
+from celery.schedules import crontab
+from .celery import app
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,7 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djoser',
-    
+    'drf_yasg',
+    'django_celery_beat',
+    'django_celery_results',
     
     'rest_framework',
     'rest_framework.authtoken',
@@ -95,14 +100,20 @@ WSGI_APPLICATION = 'beauty_salon.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+env = environ.Env()
+environ.Env.read_env()
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'HOST': os.environ.get('DB_HOST'),
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASS'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'HOST': env('DB_HOST'),
+        # 'NAME': env('DB_NAME'),
+        # 'USER': env('DB_USER'),
+        # 'PASSWORD': env('DB_PASS'),
+        'HOST': 'localhost',
+        'NAME': 'Salon',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
     }
 }
 
@@ -129,9 +140,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'GMT'
 
 USE_I18N = True
 
@@ -155,6 +166,30 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 AUTH_USER_MODEL = "users.User"
+
+CELERY_RESULT_BACKEND = 'django-db'
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+app.conf.beat_schedule = {
+    'send-meeting-reminder-every-day': {
+        'task': 'services.tasks.send_appointment_reminder',
+        'schedule': crontab(hour=14, minute=55),  # Задача выполняется каждый день в 9:00
+    },
+}
+
+
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
 
 
 DJOSER = {

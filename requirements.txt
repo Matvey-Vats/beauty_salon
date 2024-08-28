@@ -5,5 +5,7 @@ celery[redis]
 djoser
 djangorestframework-simplejwt
 Pillow
-
-
+drf-yasg
+django_celery_beat
+django_celery_results
+django-environ

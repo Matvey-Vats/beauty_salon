@@ -8,13 +8,14 @@ class Service(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     duration = models.DurationField()
+    masters = models.ManyToManyField('Master', related_name='services')
 
     def __str__(self) -> str:
         return self.name
     
 class Master(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='master')
-    services = models.ManyToManyField(Service)
+    master_services = models.ManyToManyField(Service)
 
     def __str__(self):
         return self.user.username
