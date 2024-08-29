@@ -2,9 +2,11 @@ django
 djangorestframework==3.15.2
 psycopg2-binary
 celery[redis]
+flower
 djoser
 djangorestframework-simplejwt
 Pillow
+python-decouple
 drf-yasg
 django_celery_beat
 django_celery_results

@@ -15,7 +15,7 @@ class Service(models.Model):
     
 class Master(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='master')
-    master_services = models.ManyToManyField(Service)
+    # master_services = models.ManyToManyField(Service)
 
     def __str__(self):
         return self.user.username

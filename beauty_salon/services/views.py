@@ -17,7 +17,7 @@ from .models import Service, Master, Appointment
 
 
 class ServiceListCreateView(generics.ListCreateAPIView):
-    queryset = Service.objects.all()
+    queryset = Service.objects.prefetch_related('masters').all()
     
     def get_serializer_class(self):
         if self.request.method == "POST":

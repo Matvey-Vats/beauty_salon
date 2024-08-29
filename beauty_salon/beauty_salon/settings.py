@@ -13,12 +13,16 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 import environ
+from decouple import config
 from datetime import timedelta
 from celery.schedules import crontab
 from .celery import app
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+environ.Env.read_env()
 
 
 # Quick-start development settings - unsuitable for production
@@ -100,20 +104,15 @@ WSGI_APPLICATION = 'beauty_salon.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-env = environ.Env()
-environ.Env.read_env()
+
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        # 'HOST': env('DB_HOST'),
-        # 'NAME': env('DB_NAME'),
-        # 'USER': env('DB_USER'),
-        # 'PASSWORD': env('DB_PASS'),
-        'HOST': 'localhost',
-        'NAME': 'Salon',
-        'USER': 'postgres',
-        'PASSWORD': 'admin',
+        'HOST': env('DB_HOST'),
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASS'),
     }
 }
 
@@ -142,7 +141,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-RU'
 
-TIME_ZONE = 'GMT'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -183,7 +182,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 app.conf.beat_schedule = {
     'send-meeting-reminder-every-day': {
         'task': 'services.tasks.send_appointment_reminder',
-        'schedule': crontab(hour=14, minute=55),  # Задача выполняется каждый день в 9:00
+        'schedule': crontab(hour=13, minute=00),  # Задача выполняется каждый день в 9:00
     },
 }
 
@@ -198,6 +197,20 @@ DJOSER = {
     'ACTIVATION_URL': '#/activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {},
+}
+
+
+LOGGING = {
+    'version': 1,
+   'handlers': {
+       'console': {'class': 'logging.StreamHandler'}
+   },
+   'loggers': {
+       'django.db.backends': {
+           'handlers': ['console'],
+           'level': 'DEBUG',
+       }
+   }
 }
 
 

@@ -16,7 +16,7 @@ def send_appointment_reminder():
     for appointment in appointments:
         send_mail(
             'Напоминание о записи',
-            f'Напоминаем вам о записи на услугу "{appointment.service.name}" завтра ({appointment.date}).',
+            f'{appointment.client.username} напоминаем вам о записи на услугу "{appointment.service.name}" завтра ({appointment.date}).',
             'from@example.com',
             [appointment.client.email],
             fail_silently=False,
