@@ -3,6 +3,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from .yasg import urlpatterns as doc_urls
+from graphene_django.views import GraphQLView
+from beauty_salon.schema import schema
 
 
 urlpatterns = [
@@ -12,6 +14,7 @@ urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),
     path('auth/', include('djoser.urls.jwt')),
     path('api/v1/', include('services.urls')),
+    path('graphql/', GraphQLView.as_view(graphiql=True, schema=schema)),
 ]
 
 urlpatterns += doc_urls

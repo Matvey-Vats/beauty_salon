@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_celery_beat',
     'django_celery_results',
+    'graphene_django',
     
     'rest_framework',
     'rest_framework.authtoken',
@@ -61,12 +62,18 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+GRAPHENE = {
+    'SCHEMA': 'beauty_salon.schema.schema'  # путь к файлу с описанием схемы
+}
 
 
 REST_FRAMEWORK = {
@@ -199,6 +206,18 @@ DJOSER = {
     'SERIALIZERS': {},
 }
 
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://redis:6379/0',
+        "OPTIONS": {
+            "db": "1",
+        },
+    }
+}
+
+CACHE_TTL = 60 * 5 
 
 LOGGING = {
     'version': 1,

@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.core.cache import cache
 from rest_framework import generics, viewsets
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from django.conf import settings
 
 from .permissions import IsAdminOrIsSelf
 
@@ -33,9 +34,7 @@ class ServiceListCreateView(generics.ListCreateAPIView):
         if not request.user.is_staff:
             raise PermissionDenied("Only admins can create services.")
         return super().create(request, *args, **kwargs)
-    
-    
-    
+        
 
 class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ServiceSerializer
@@ -52,11 +51,7 @@ class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         self.check_staff_permissions(request)
         return super().update(request, *args, **kwargs)
-    
 
-# class MasterViewSet(viewsets.ReadOnlyModelViewSet):
-#     serializer_class = MasterSerializer
-#     queryset = Master.objects.select_related('user').all()
     
 class MasterListView(generics.ListCreateAPIView):
     queryset = Master.objects.select_related('user').all()
@@ -87,9 +82,6 @@ class MasterListByServiceView(APIView):
         masters = Master.objects.select_related('user').filter(services__id=service_id)
         return Response([{'id': master.id, 'username': master.user.username} for master in masters])
 
-# class AppointmentViewSet(viewsets.ReadOnlyModelViewSet):
-#     serializer_class = AppointmentSerializer
-#     queryset = Appointment.objects.all()
     
     
 class AppointmentListView(generics.ListCreateAPIView):
