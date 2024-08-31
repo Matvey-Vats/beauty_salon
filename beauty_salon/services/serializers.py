@@ -52,6 +52,20 @@ class MasterSerializer(serializers.ModelSerializer):
         model = Master
         fields = '__all__'
         
+class MasterCreateSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    class Meta:
+        model = Master
+        fields = ('user',)
+        
+class MasterDetailSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    # services = ServiceSerializer(read_only=True, many=True)
+    
+    class Meta:
+        model = Master
+        fields = ('user', 'services')
+        
         
         
 class AppointmentListSerializer(serializers.ModelSerializer):

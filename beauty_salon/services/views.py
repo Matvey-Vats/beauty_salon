@@ -5,10 +5,14 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 
+from .permissions import IsAdminOrIsSelf
+
 from .serializers import (
     ServiceSerializer,
     ServiceCreateSerializer,
     MasterSerializer,
+    MasterCreateSerializer,
+    MasterDetailSerializer,
     AppointmentListSerializer,
     AppointmentCreateSerializer,
     AppointmentDetailSerializer,
@@ -35,7 +39,7 @@ class ServiceListCreateView(generics.ListCreateAPIView):
 
 class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ServiceSerializer
-    queryset = Service.objects.all()
+    queryset = Service.objects.prefetch_related('masters').all()
     
     def check_staff_permissions(self, request):
         if not request.user.is_staff:
@@ -50,16 +54,37 @@ class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
         return super().update(request, *args, **kwargs)
     
 
-class MasterViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = MasterSerializer
-    queryset = Master.objects.all()
+# class MasterViewSet(viewsets.ReadOnlyModelViewSet):
+#     serializer_class = MasterSerializer
+#     queryset = Master.objects.select_related('user').all()
+    
+class MasterListView(generics.ListCreateAPIView):
+    queryset = Master.objects.select_related('user').all()
+    
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return MasterCreateSerializer
+        return MasterSerializer
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+        
+class MasterDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Master.objects.select_related('user').all()
+    permission_classes = (IsAdminOrIsSelf,)
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return MasterSerializer
+        return MasterDetailSerializer
+    
 
 
 class MasterListByServiceView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, service_id):
-        masters = Master.objects.filter(services__id=service_id)
+        masters = Master.objects.select_related('user').filter(services__id=service_id)
         return Response([{'id': master.id, 'username': master.user.username} for master in masters])
 
 # class AppointmentViewSet(viewsets.ReadOnlyModelViewSet):
@@ -68,18 +93,17 @@ class MasterListByServiceView(APIView):
     
     
 class AppointmentListView(generics.ListCreateAPIView):
-    queryset = Appointment.objects.all()
+    queryset = Appointment.objects.select_related('client', 'service', 'master').all()
     
     
     def get_serializer_class(self):
-        if self.request.method == "GET":
-            return AppointmentListSerializer
-        elif self.request.method == "POST":
+        if self.request.method == "POST":
             return AppointmentCreateSerializer
+        return AppointmentListSerializer
         
     def perform_create(self, serializer):
         serializer.save(client=self.request.user)
         
 class AppointmentDetailView(generics.RetrieveUpdateAPIView):
-    queryset = Appointment.objects.all()
+    queryset = Appointment.objects.select_related('client', 'service', 'master').all()
     serializer_class = AppointmentDetailSerializer
