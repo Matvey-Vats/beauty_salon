@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from django.conf import settings
+import logging
 
 from .permissions import IsAdminOrIsSelf
 
@@ -21,6 +22,8 @@ from .serializers import (
 from .models import Service, Master, Appointment
 
 
+logger = logging.getLogger(__name__)
+
 class ServiceListCreateView(generics.ListCreateAPIView):
     queryset = Service.objects.prefetch_related('masters').all()
     
@@ -32,9 +35,13 @@ class ServiceListCreateView(generics.ListCreateAPIView):
     
     def create(self, request, *args, **kwargs):
         if not request.user.is_staff:
+            logger.warning(f"User {request.user} attempted to create a service but does not have permission.")
             raise PermissionDenied("Only admins can create services.")
-        return super().create(request, *args, **kwargs)
         
+        response = super().create(request, *args, **kwargs)
+        logger.info(f"Service created by {request.user}. Response status: {response.status_code}.")
+        return response
+
 
 class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ServiceSerializer
@@ -42,15 +49,21 @@ class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
     
     def check_staff_permissions(self, request):
         if not request.user.is_staff:
+            logger.warning(f"User {request.user} attempted to perform an action on a service but does not have permission.")
             raise PermissionDenied("Only admins can perform this action.")
 
     def delete(self, request, *args, **kwargs):
         self.check_staff_permissions(request)
-        return super().delete(request, *args, **kwargs)
+        response = super().delete(request, *args, **kwargs)
+        logger.info(f"Service deleted by {request.user}. Response status: {response.status_code}.")
+        return response
 
     def update(self, request, *args, **kwargs):
         self.check_staff_permissions(request)
-        return super().update(request, *args, **kwargs)
+        response = super().update(request, *args, **kwargs)
+        logger.info(f"Service updated by {request.user}. Response status: {response.status_code}.")
+        return response
+
 
     
 class MasterListView(generics.ListCreateAPIView):
