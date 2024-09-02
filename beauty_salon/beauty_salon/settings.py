@@ -191,6 +191,15 @@ app.conf.beat_schedule = {
         'task': 'services.tasks.send_appointment_reminder',
         'schedule': crontab(hour=13, minute=00),  # Задача выполняется каждый день в 9:00
     },
+    'update_appointment_status_every_minute': {
+        'task': 'services.tasks.update_appointment_status',
+        'schedule': crontab(minute='*/1'),  # Каждую минуту
+    },
+    'archive-old-appointments-every-day': {
+        'task': 'services.tasks.archive_old_appointments',
+        'schedule': crontab(minute='*/1'),  # Выполняется каждый день в полночь
+    },
+    
 }
 
 

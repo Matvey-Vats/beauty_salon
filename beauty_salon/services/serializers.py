@@ -86,11 +86,28 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         service = data.get('service')
         master = data.get('master')
+        appointment_start_time = data['date']
+        appointment_end_time = appointment_start_time + service.duration
+        
+        existing_appointments = Appointment.objects.filter(
+            master=master,
+            date__date=appointment_start_time.date()
+        )
 
         if master and service and not master.services.filter(id=service.id).exists():
             raise serializers.ValidationError("Этот мастер не предлагает выбранную услугу.")
         
+        for appointment in existing_appointments:
+            if (appointment_start_time < appointment.get_end_time() and appointment_end_time > appointment.date):
+                raise serializers.ValidationError(
+                    "Мастер занят в указанное время. Пожалуйста, выберите другое время."
+                )
+                
         return data
+    
+        
+
+
     
 class AppointmentDetailSerializer(serializers.ModelSerializer):
     service = serializers.SlugRelatedField(slug_field="name", read_only=True)

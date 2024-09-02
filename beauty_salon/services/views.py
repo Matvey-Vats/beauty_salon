@@ -1,4 +1,6 @@
 from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from rest_framework import generics, viewsets
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -32,6 +34,10 @@ class ServiceListCreateView(generics.ListCreateAPIView):
             return ServiceCreateSerializer
         elif self.request.method == "GET":
             return ServiceSerializer
+        
+    @method_decorator(cache_page(60 * 2))
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
     
     def create(self, request, *args, **kwargs):
         if not request.user.is_staff:

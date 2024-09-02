@@ -14,6 +14,7 @@ urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),
     path('auth/', include('djoser.urls.jwt')),
     path('api/v1/', include('services.urls')),
+    path('api/v1/users/', include('users.urls')),
     path('graphql/', GraphQLView.as_view(graphiql=True, schema=schema)),
 ]
 

@@ -35,5 +35,23 @@ class Appointment(models.Model):
     
     def __str__(self):
         return f"{self.client.username} - {self.service.name} with {self.master.user.username} on {self.date}"  
+    
+    
+    def get_end_time(self):
+        return self.date + self.service.duration
 
 
+class AppointmentArchive(models.Model):
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    master = models.ForeignKey(Master, on_delete=models.CASCADE)
+    client = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    date = models.DateTimeField()
+    status = models.CharField(max_length=10, choices=[
+        ('completed', 'Completed'),
+        ('canceled', 'Canceled')
+    ])
+    
+    archived_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self) -> str:
+        return f"Archived: {self.client.username} - {self.service.name} with {self.master.user.username} on {self.date}"
