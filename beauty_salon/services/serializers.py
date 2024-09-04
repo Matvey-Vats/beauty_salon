@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Service, Master, Appointment
+from .models import Service, Master, Appointment, AppointmentArchive
 
 class ServiceSerializer(serializers.ModelSerializer):
     masters = serializers.SerializerMethodField()
@@ -105,9 +105,6 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
                 
         return data
     
-        
-
-
     
 class AppointmentDetailSerializer(serializers.ModelSerializer):
     service = serializers.SlugRelatedField(slug_field="name", read_only=True)
@@ -119,3 +116,8 @@ class AppointmentDetailSerializer(serializers.ModelSerializer):
         fields = ('date', 'service', 'master', 'client', 'status')
         
     
+# class AppointmentArchiveSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = AppointmentArchive
+#         fields = "__all__"
+        

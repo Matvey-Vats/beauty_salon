@@ -183,6 +183,14 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'max_retries': 3,  # количество попыток переподключения
+    'interval_start': 0,  # начальная задержка между попытками переподключения
+    'interval_step': 0.2,  # увеличение задержки между попытками
+    'interval_max': 0.5,  # максимальная задержка
+}
+
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 

@@ -6,10 +6,12 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from django.db.models import Count
 from django.conf import settings
 import logging
 
 from .permissions import IsAdminOrIsSelf
+from .mixins import CacheMixin
 
 from .serializers import (
     ServiceSerializer,
@@ -21,12 +23,12 @@ from .serializers import (
     AppointmentCreateSerializer,
     AppointmentDetailSerializer,
 )
-from .models import Service, Master, Appointment
+from .models import Service, Master, Appointment, AppointmentArchive
 
 
 logger = logging.getLogger(__name__)
 
-class ServiceListCreateView(generics.ListCreateAPIView):
+class ServiceListCreateView(CacheMixin, generics.ListCreateAPIView):
     queryset = Service.objects.prefetch_related('masters').all()
     
     def get_serializer_class(self):
@@ -35,9 +37,20 @@ class ServiceListCreateView(generics.ListCreateAPIView):
         elif self.request.method == "GET":
             return ServiceSerializer
         
-    @method_decorator(cache_page(60 * 2))
+    
     def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        cache_name = 'service_list_cache'
+        cache_time = 60 * 10  # Время жизни кэша (10 минут)
+
+        # Получаем данные из кэша или из базы данных, если кэша нет
+        data = self.get_cache_data(cache_name)
+        if not data:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.data
+            self.set_cache_data(cache_name, data, cache_time)
+        
+        return Response(data)
     
     def create(self, request, *args, **kwargs):
         if not request.user.is_staff:
@@ -46,6 +59,8 @@ class ServiceListCreateView(generics.ListCreateAPIView):
         
         response = super().create(request, *args, **kwargs)
         logger.info(f"Service created by {request.user}. Response status: {response.status_code}.")
+        
+        self.invalidate_cache("service_list_cache")
         return response
 
 
@@ -118,3 +133,10 @@ class AppointmentListView(generics.ListCreateAPIView):
 class AppointmentDetailView(generics.RetrieveUpdateAPIView):
     queryset = Appointment.objects.select_related('client', 'service', 'master').all()
     serializer_class = AppointmentDetailSerializer
+    
+class AppointmentArchiveListView(generics.ListAPIView):
+    def get(self, request, *args, **kwargs):
+        # Статистика по количеству завершенных услуг для каждого клиента
+        stats = AppointmentArchive.objects.values('client__username').annotate(total_services=Count('id')).order_by('-total_services')
+
+        return Response(stats.data)
