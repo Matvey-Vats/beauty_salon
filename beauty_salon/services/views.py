@@ -28,7 +28,42 @@ from .models import Service, Master, Appointment, AppointmentArchive
 
 logger = logging.getLogger(__name__)
 
-class ServiceListCreateView(CacheMixin, generics.ListCreateAPIView):
+# class ServiceListCreateView(CacheMixin, generics.ListCreateAPIView):
+#     queryset = Service.objects.prefetch_related('masters').all()
+    
+#     def get_serializer_class(self):
+#         if self.request.method == "POST":
+#             return ServiceCreateSerializer
+#         elif self.request.method == "GET":
+#             return ServiceSerializer
+        
+    
+#     def get(self, request, *args, **kwargs):
+#         cache_name = 'service_list_cache'
+#         cache_time = 60 * 10  # Время жизни кэша (10 минут)
+
+#         # Получаем данные из кэша или из базы данных, если кэша нет
+#         data = self.get_cache_data(cache_name)
+#         if not data:
+#             queryset = self.get_queryset()
+#             serializer = self.get_serializer(queryset, many=True)
+#             data = serializer.data
+#             self.set_cache_data(cache_name, data, cache_time)
+        
+#         return Response(data)
+    
+#     def create(self, request, *args, **kwargs):
+#         if not request.user.is_staff:
+#             logger.warning(f"User {request.user} attempted to create a service but does not have permission.")
+#             raise PermissionDenied("Only admins can create services.")
+        
+#         response = super().create(request, *args, **kwargs)
+#         logger.info(f"Service created by {request.user}. Response status: {response.status_code}.")
+        
+#         self.invalidate_cache("service_list_cache")
+#         return response
+
+class ServiceListCreateView(generics.ListCreateAPIView):
     queryset = Service.objects.prefetch_related('masters').all()
     
     def get_serializer_class(self):
@@ -36,21 +71,6 @@ class ServiceListCreateView(CacheMixin, generics.ListCreateAPIView):
             return ServiceCreateSerializer
         elif self.request.method == "GET":
             return ServiceSerializer
-        
-    
-    def get(self, request, *args, **kwargs):
-        cache_name = 'service_list_cache'
-        cache_time = 60 * 10  # Время жизни кэша (10 минут)
-
-        # Получаем данные из кэша или из базы данных, если кэша нет
-        data = self.get_cache_data(cache_name)
-        if not data:
-            queryset = self.get_queryset()
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.data
-            self.set_cache_data(cache_name, data, cache_time)
-        
-        return Response(data)
     
     def create(self, request, *args, **kwargs):
         if not request.user.is_staff:
@@ -59,8 +79,6 @@ class ServiceListCreateView(CacheMixin, generics.ListCreateAPIView):
         
         response = super().create(request, *args, **kwargs)
         logger.info(f"Service created by {request.user}. Response status: {response.status_code}.")
-        
-        self.invalidate_cache("service_list_cache")
         return response
 
 
@@ -133,6 +151,7 @@ class AppointmentListView(generics.ListCreateAPIView):
 class AppointmentDetailView(generics.RetrieveUpdateAPIView):
     queryset = Appointment.objects.select_related('client', 'service', 'master').all()
     serializer_class = AppointmentDetailSerializer
+    
     
 class AppointmentArchiveListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):

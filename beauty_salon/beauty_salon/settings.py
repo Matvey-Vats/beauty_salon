@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'graphene_django',
+    'cachalot',
+    'debug_toolbar',
     
     'rest_framework',
     'rest_framework.authtoken',
@@ -69,6 +71,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+
+INTERNAL_IPS = [
+    '127.0.0.1',
 ]
 
 GRAPHENE = {
@@ -115,7 +122,7 @@ WSGI_APPLICATION = 'beauty_salon.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'HOST': env('DB_HOST'),
         'NAME': env('DB_NAME'),
         'USER': env('DB_USER'),
@@ -205,7 +212,7 @@ app.conf.beat_schedule = {
     },
     'archive-old-appointments-every-day': {
         'task': 'services.tasks.archive_old_appointments',
-        'schedule': crontab(minute='*/1'),  # Выполняется каждый день в полночь
+        'schedule': crontab(minute='*/1'),
     },
     
 }
@@ -226,15 +233,16 @@ DJOSER = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://redis:6379/0',
-        "OPTIONS": {
-            "db": "1",
-        },
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
 
-CACHE_TTL = 60 * 5 
+CACHALOT_DATABASES = ['default']
+
+
+CACHALOT_TIMEOUT = 60 * 10
+# CACHE_TTL = 60 * 5 
 
 LOGGING = {
     'version': 1,
@@ -245,7 +253,12 @@ LOGGING = {
        'django.db.backends': {
            'handlers': ['console'],
            'level': 'DEBUG',
-       }
+       },
+       'cachalot': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
    }
 }
 

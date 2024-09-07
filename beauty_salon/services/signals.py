@@ -17,8 +17,8 @@ def send_appointment_email(sender, instance, created, **kwargs):
             fail_silently=False,
         )
 
-@receiver(post_save, sender=Service)
-@receiver(post_delete, sender=Service)
-def clear_service_cache(sender, **kwargs):
-    cache_name = 'service_list_cache'
-    cache.delete(cache_name)
+# @receiver(post_save, sender=Service)
+# @receiver(post_delete, sender=Service)
+# def clear_service_cache(sender, **kwargs):
+#     cache_name = 'service_list_cache'
+#     cache.delete(cache_name)
