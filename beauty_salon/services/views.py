@@ -106,7 +106,7 @@ class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     
 class MasterListView(generics.ListCreateAPIView):
-    queryset = Master.objects.select_related('user').all()
+    queryset = Master.objects.select_related('user').prefetch_related('services').all()
     
     def get_serializer_class(self):
         if self.request.method == "POST":

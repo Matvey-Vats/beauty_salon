@@ -31,6 +31,12 @@ services:
     ports:
       - "6379:6379"
 
+  memcached:
+    image: memcached:latest
+    ports:
+      - "11211:11211"
+    restart: unless-stopped
+
   celery_worker:
     build: .
     command: celery -A beauty_salon worker --loglevel=info  # Запуск Celery worker
