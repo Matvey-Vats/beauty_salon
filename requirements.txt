@@ -20,5 +20,6 @@ pymemcache
 python-decouple
 django-environ
 pylibmc
+django-filter
 
 

@@ -6,12 +6,13 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Count
 from django.conf import settings
 import logging
 
 from .permissions import IsAdminOrIsSelf
-from .mixins import CacheMixin
+from .utils import ServiceFilter, AppointmentFilter
 
 from .serializers import (
     ServiceSerializer,
@@ -65,6 +66,9 @@ logger = logging.getLogger(__name__)
 
 class ServiceListCreateView(generics.ListCreateAPIView):
     queryset = Service.objects.prefetch_related('masters').all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ServiceFilter
+    
     
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -138,7 +142,8 @@ class MasterListByServiceView(APIView):
     
 class AppointmentListView(generics.ListCreateAPIView):
     queryset = Appointment.objects.select_related('client', 'service', 'master').all()
-    
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = AppointmentFilter
     
     def get_serializer_class(self):
         if self.request.method == "POST":
