@@ -1,5 +1,5 @@
 from django.test import TestCase
-from services.models import Service, Appointment, Master
+from services.models import Service, Appointment, Master, Review
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
@@ -92,3 +92,26 @@ class AppointmentTestCase(TestCase):
         """Тестируем удаление записи."""
         self.appointment.delete()
         self.assertEqual(Appointment.objects.count(), 0)
+        
+class ReviewTest(TestCase):
+    def setUp(self) -> None:
+        self.client_user = get_user_model().objects.create(
+            username="client",
+            password="password1234"
+        )
+        
+        self.service = Service.objects.create(name="Test Service")
+        
+    
+    def test_review_create(self):
+        review = Review.objects.create(
+            client=self.client_user,
+            service=self.service,
+            rating=5,
+            comment="Good service"
+        )
+        
+        self.assertEqual(review.client.username, "client")
+        self.assertEqual(review.service.name, 'Test Service')
+        self.assertEqual(review.rating, 5)
+        self.assertEqual(review.comment, 'Good service')

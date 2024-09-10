@@ -55,3 +55,18 @@ class AppointmentArchive(models.Model):
     
     def __str__(self) -> str:
         return f"Archived: {self.client.username} - {self.service.name} with {self.master.user.username} on {self.date}"
+    
+class Review(models.Model):
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="reviews")
+    master = models.ForeignKey(Master, on_delete=models.CASCADE, related_name="reviews")
+    client = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="reviews")
+    rating = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 6)], default=5)
+    comment = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"Отзыв от {self.client.username} для {self.service.name}"

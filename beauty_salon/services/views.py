@@ -23,8 +23,9 @@ from .serializers import (
     AppointmentListSerializer,
     AppointmentCreateSerializer,
     AppointmentDetailSerializer,
+    ReviewSerializer,
 )
-from .models import Service, Master, Appointment, AppointmentArchive
+from .models import Service, Master, Appointment, AppointmentArchive, Review
 
 
 logger = logging.getLogger(__name__)
@@ -141,7 +142,7 @@ class MasterListByServiceView(APIView):
     
     
 class AppointmentListView(generics.ListCreateAPIView):
-    queryset = Appointment.objects.select_related('client', 'service', 'master').all()
+    queryset = Appointment.objects.select_related('client', 'service', 'master',).all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = AppointmentFilter
     
@@ -163,4 +164,13 @@ class AppointmentArchiveListView(generics.ListAPIView):
         # Статистика по количеству завершенных услуг для каждого клиента
         stats = AppointmentArchive.objects.values('client__username').annotate(total_services=Count('id')).order_by('-total_services')
 
-        return Response(stats.data)
+        return Response(stats)
+    
+    
+class ReviewListCreateView(generics.ListCreateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    
+    def perform_create(self, serializer):
+        serializer.save(client=self.request.user)
+        

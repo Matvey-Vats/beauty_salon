@@ -15,6 +15,7 @@ urlpatterns = [
     path('auth/', include('djoser.urls.jwt')),
     path('api/v1/', include('services.urls')),
     path('api/v1/users/', include('users.urls')),
+    path('api/v1/', include('notifications.urls')),
     path('graphql/', GraphQLView.as_view(graphiql=True, schema=schema)),
     path('__debug__/', include('debug_toolbar.urls')),
 ]

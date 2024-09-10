@@ -16,5 +16,7 @@ urlpatterns = format_suffix_patterns([
     path('masters_by_service/<int:service_id>/', views.MasterListByServiceView.as_view()),
     path('appointments/', views.AppointmentListView.as_view()),
     path('appointments/<int:pk>/', views.AppointmentDetailView.as_view()),
-    # path('appointments_archive/', views.AppointmentArchiveListView.as_view()),
+    path('appointments_archive/', views.AppointmentArchiveListView.as_view()),
+    
+    path('review/', views.ReviewListCreateView.as_view()),
 ])
