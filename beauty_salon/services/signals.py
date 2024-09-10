@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.core.cache import cache
 from .models import Appointment, Service
+from notifications.models import Messages
 
 @receiver(post_save, sender=Appointment)
 def send_appointment_email(sender, instance, created, **kwargs):
@@ -16,6 +17,15 @@ def send_appointment_email(sender, instance, created, **kwargs):
             recipient_list=[instance.client.email],
             fail_silently=False,
         )
+        
+        Messages.objects.create(
+            user=instance.client,
+            content=f'Уважаемый {instance.client.username}, вы записаны на {instance.service.name} в {instance.date}.',
+        )
+
+
+
+
 
 # @receiver(post_save, sender=Service)
 # @receiver(post_delete, sender=Service)
