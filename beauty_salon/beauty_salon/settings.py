@@ -46,10 +46,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'rest_framework',
+    'rest_framework.authtoken',
+    
+    
     'djoser',
     'django_filters',
     'debug_toolbar',
-    'drf_yasg',
+    'drf_spectacular',
     'django_celery_beat',
     'django_celery_results',
     'graphene_django',
@@ -57,8 +62,7 @@ INSTALLED_APPS = [
     'corsheaders',
     
     
-    'rest_framework',
-    'rest_framework.authtoken',
+    
     
     'services',
     'users',
@@ -122,6 +126,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     )
@@ -132,7 +139,7 @@ ROOT_URLCONF = 'beauty_salon.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
