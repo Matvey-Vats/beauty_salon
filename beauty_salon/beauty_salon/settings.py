@@ -76,6 +76,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     # 'cachalot.middleware.CachalotMiddleware',
 ]
 
@@ -86,6 +87,15 @@ INTERNAL_IPS = [
 DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 }
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://0.0.0.0:0000",
+]
+
 
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',
@@ -135,7 +145,7 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = 'beauty_salon.wsgi.application'
+WSGI_APPLICATION = 'beauty_salon.wsgi.application'
 
 
 # Database
@@ -230,12 +240,16 @@ app.conf.beat_schedule = {
     },
     'update_appointment_status_every_minute': {
         'task': 'services.tasks.update_appointment_status',
-        'schedule': crontab(minute='*/1'),  # Каждую минуту
+        'schedule': crontab(hour='*/1'),  # Каждую минуту
     },
     'archive-old-appointments-every-day': {
         'task': 'services.tasks.archive_old_appointments',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(hour=12, minute=00),
     },
+    'delete-old-notifications-every-day': {
+        'task': 'notifications.tasks.delete_readed_notification',
+        'schedule': crontab(hour=00, minute=00),
+    }
     
 }
 

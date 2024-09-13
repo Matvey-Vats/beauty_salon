@@ -7,7 +7,7 @@ from datetime import timedelta
 @shared_task
 def send_appointment_reminder():
     from .models import Appointment
-    
+    from notifications.models import Messages
     
     now = timezone.now()
     reminder_time = now + timedelta(days=1)
@@ -20,6 +20,11 @@ def send_appointment_reminder():
             'from@example.com',
             [appointment.client.email],
             fail_silently=False,
+        )
+        
+        Messages.objects.create(
+            user=appointment.client,
+            content=f'Уважаемый {appointment.client.username}, вы записаны на {appointment.service.name} в {appointment.date}.',
         )
         
 @shared_task
