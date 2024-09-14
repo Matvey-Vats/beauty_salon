@@ -22,4 +22,4 @@ django-environ
 pylibmc
 django-filter
 drf-spectacular
-
+django-sse
