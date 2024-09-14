@@ -5,7 +5,7 @@ from services.models import Master
 # Create your models here.
 class Room(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    clinet = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="client_rooms")
+    client = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="client_rooms")
     master = models.ForeignKey(Master, on_delete=models.CASCADE, related_name="master_rooms")
     created_at = models.DateTimeField(auto_now_add=True)
     

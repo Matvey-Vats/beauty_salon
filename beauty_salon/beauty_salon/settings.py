@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'graphene_django',
-    'django_sse',
     'cachalot',
     'corsheaders',
     
