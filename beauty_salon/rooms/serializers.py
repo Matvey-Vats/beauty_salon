@@ -19,3 +19,16 @@ class ChatMessageCreateSerializer(serializers.ModelSerializer):
         fields = ["content"]
         
 
+class RoomListSerializer(serializers.ModelSerializer):
+    client = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    master = serializers.SlugRelatedField(slug_field="user.username", read_only=True)
+    class Meta:
+        model = Room
+        fields = "__all__"
+        
+
+class RoomCreateSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Room
+        fields = ["name", "client"]

@@ -3,9 +3,12 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+from django.db.models import Q
+from rest_framework.exceptions import PermissionDenied
 
+from services.models import Master
 from .models import Room, ChatMessage
-from .serializers import ChatMessageSerializer, ChatMessageCreateSerializer
+from .serializers import ChatMessageSerializer, ChatMessageCreateSerializer, RoomListSerializer, RoomCreateSerializer
 
 
 
@@ -72,4 +75,35 @@ class ChatMessageAPIView(generics.ListCreateAPIView):
         room_name = self.kwargs['room_name']
         room = Room.objects.get(name=room_name)
         
-        serializer.save(room=room, sender=self.request.user)     
+        serializer.save(room=room, sender=self.request.user)
+        
+class RoomListCreateView(generics.ListCreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    
+    def get_queryset(self):
+        
+        try:
+            master = Master.objects.get(user=self.request.user)
+        except Master.DoesNotExist:
+            master = None
+            
+        queryset = Room.objects.filter(Q(client=self.request.user) | Q(master=master))
+        return queryset
+    
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return RoomListSerializer
+        else:
+            return RoomCreateSerializer
+        
+    def perform_create(self, serializer):
+        user = self.request.user
+        
+        master = Master.objects.get(user=user)
+        
+        if not master:
+            return PermissionDenied("Только мастер может создать чат")
+        
+        serializer.save(master=master)
