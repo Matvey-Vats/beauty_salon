@@ -19,4 +19,5 @@ urlpatterns = format_suffix_patterns([
     path('appointments_archive/', views.AppointmentArchiveListView.as_view()),
     
     path('review/', views.ReviewListCreateView.as_view()),
+    path('masters/<int:master_id>/schedule/', views.MasterScheduleView.as_view()),
 ])

@@ -1,7 +1,7 @@
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
-from rest_framework import generics, viewsets
+from rest_framework import generics, viewsets, status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -9,10 +9,14 @@ from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Count
 from django.conf import settings
+from django.utils import timezone
 import logging
 
+from datetime import datetime, timedelta
+
+
 from .permissions import IsAdminOrIsSelf
-from .utils import ServiceFilter, AppointmentFilter
+from .utils import ServiceFilter, AppointmentFilter, get_master_schedule
 
 from .serializers import (
     ServiceSerializer,
@@ -174,3 +178,17 @@ class ReviewListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(client=self.request.user)
         
+
+class MasterScheduleView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, master_id, *args, **kwargs):
+        try:
+            master = Master.objects.get(id=master_id)
+        except Master.DoesNotExist:
+            return Response({"error": "Master not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+        schedule = get_master_schedule(master)
+        
+        return Response(schedule, status=status.HTTP_200_OK)
