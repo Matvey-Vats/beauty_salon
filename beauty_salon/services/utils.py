@@ -2,8 +2,21 @@ from django_filters import rest_framework as filters
 from .models import Service, Appointment, Master
 from datetime import timedelta
 from django.utils import timezone
-
+from django.core.mail import send_mail
 from django.utils import timezone
+
+
+
+def send_notification_email(subject, message, recipient_list):
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email='noreply@example.com',
+        recipient_list=recipient_list,
+        fail_silently=False,
+    )
+
+
 
 def get_master_schedule(master, date=None):
     if date is None:

@@ -180,7 +180,6 @@ class ReviewListCreateView(generics.ListCreateAPIView):
         
 
 class MasterScheduleView(APIView):
-    permission_classes = [IsAuthenticated]
     
     def get(self, request, master_id, *args, **kwargs):
         try:
