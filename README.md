@@ -18,7 +18,9 @@ First clone the repository:
 ```bash
 git clone https://github.com/Matvey-Vats/beauty_salon.git
 cd beauty_salon
-
+```
 
 Documentation
+```
 swagger/
+```
