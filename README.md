@@ -22,5 +22,5 @@ cd beauty_salon
 
 Documentation
 ```
-swagger/
+docs/
 ```
